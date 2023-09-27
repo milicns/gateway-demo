@@ -1,0 +1,74 @@
+version: "3.8"
+services:
+  gateway:
+    image: nginx:1.19.8-alpine
+    ports:
+      - 8080:8080
+    networks:
+      - network
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf
+      - ./gateway/api_gateway.conf:/etc/nginx/api_gateway.conf
+
+  grpc_router:
+    image: grpc-router
+    container_name: grpc-router
+    build:
+      context: .
+      dockerfile: ./grpc-router/Dockerfile
+    restart: on-failure
+    environment:
+      GRPC_ROUTER_PORT: ${GRPC_ROUTER_PORT}
+    networks:
+      - network
+
+  user_service:
+    image: user-service
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: ./user-service/Dockerfile
+    restart: on-failure
+    environment:
+      USERS_DB_HOST: ${USERS_DB_HOST}
+      USERS_DB_PORT: ${USERS_DB_PORT}
+      USER_SERVICE_HOST: ${USER_SERVICE_HOST}
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
+    depends_on:
+      - users_db
+    networks:
+      - network
+
+  order_service:
+    image: order-service
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: ./order-service/Dockerfile
+    restart: on-failure
+    environment:
+      ORDERS_DB_HOST: ${ORDERS_DB_HOST}
+      ORDERS_DB_PORT: ${ORDERS_DB_PORT}
+      ORDER_SERVICE_PORT: ${ORDER_SERVICE_PORT}
+    depends_on:
+      - orders_db
+    networks:
+      - network
+
+  users_db:
+    image: mongo
+    container_name: users_db
+    restart: on-failure
+    networks:
+      - network
+
+  orders_db:
+    image: mongo
+    container_name: orders_db
+    restart: on-failure
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
