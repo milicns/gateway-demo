@@ -1,27 +1,5 @@
 version: "3.8"
 services:
-  gateway:
-    image: nginx:1.19.8-alpine
-    ports:
-      - 8080:8080
-    networks:
-      - network
-    volumes:
-      - ./gateway/nginx.conf:/etc/nginx/nginx.conf
-      - ./gateway/api_gateway.conf:/etc/nginx/api_gateway.conf
-
-  grpc_router:
-    image: grpc-router
-    container_name: grpc-router
-    build:
-      context: .
-      dockerfile: ./grpc-router/Dockerfile
-    restart: on-failure
-    environment:
-      GRPC_ROUTER_PORT: ${GRPC_ROUTER_PORT}
-    networks:
-      - network
-
   user_service:
     image: user-service
     container_name: user-service
@@ -66,6 +44,18 @@ services:
     image: mongo
     container_name: orders_db
     restart: on-failure
+    networks:
+      - network
+  
+  grpc_router:
+    image: grpc-router
+    container_name: grpc-router
+    build:
+      context: .
+      dockerfile: ./grpc-router/Dockerfile
+    restart: on-failure
+    ports:
+      - 8000:8000
     networks:
       - network
 

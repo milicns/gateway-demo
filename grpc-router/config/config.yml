@@ -1,0 +1,3 @@
+services:
+  host1: user_service:8080
+  host2: order_service:8080
