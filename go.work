@@ -1,7 +1,7 @@
 go 1.21.1
 
 use (
-	./grpc-router
+	./gateway
 	./order-service
 	./user-service
 )

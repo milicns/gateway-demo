@@ -7,8 +7,13 @@ import (
 )
 
 type Config struct {
-	Services     map[string]ServiceConfig `yaml:"services"`
-	GatewayRoute string                   `yaml:"gateway_route"`
+	Services map[string]ServiceConfig `yaml:"services"`
+	Gateway  Gateway                  `yaml:"gateway"`
+}
+
+type Gateway struct {
+	Route string `yaml:"route"`
+	Port  string `yaml:"port"`
 }
 
 type ServiceConfig struct {

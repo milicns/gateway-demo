@@ -1,19 +1,19 @@
-gateway_route: "api/shop"
+gateway: 
+  route: "api/shop"
+  port: 8000
 services:
-  user:
+  UserService:
     address: user_service:8080
     service_route: /user
     grpc_methods:
-      GetUser:
-        method_route: /{param}
-        type: GET
-      DeleteUser:
-        method_route: /{param}
-        type: DELETE
       CreateUser:
         method_route: /create
         type: POST
-  order:
+  OrderService:
     address: order_service:8080
     service_route: /order
+    grpc_methods:
+      CreateOrder:
+        method_route: /create
+        type: POST
 

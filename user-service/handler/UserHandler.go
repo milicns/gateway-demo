@@ -29,3 +29,15 @@ func (handler *UserHandler) CreateUser(ctx context.Context, request *pb.CreateUs
 		Message: "User created",
 	}, nil
 }
+
+func (handler *UserHandler) GetUser(ctx context.Context, request *pb.UserIdRequest) (*pb.GetUserResponse, error) {
+	return &pb.GetUserResponse{
+		Message: "Retrieved user" + request.Id,
+	}, nil
+}
+
+func (handler *UserHandler) DeleteUser(ctx context.Context, request *pb.UserIdRequest) (*pb.DeleteUserResponse, error) {
+	return &pb.DeleteUserResponse{
+		Message: "Deleted user" + request.Id,
+	}, nil
+}
