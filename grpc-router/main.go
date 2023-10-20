@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"grpc-router/client"
 	"grpc-router/config"
@@ -13,23 +14,37 @@ import (
 func main() {
 	conf, err := config.LoadConfig()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
 	clientRegistry := &client.ClientRegistry{
 		Clients: make(map[string]client.Client),
 	}
-	for _, v := range conf.Services {
-		clientRegistry.NewClient(v)
-	}
-	for _, v := range clientRegistry.Clients {
-		fmt.Println(v.Cc.Target())
+
+	for _, s := range conf.Services {
+		clientRegistry.NewClient(s.Address, s.Methods)
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	c := clientRegistry.Clients["user_service:8080"]
-	router.HandleFunc("/user", c.ListServices).Methods("POST")
+	for _, s := range conf.Services {
+		c := clientRegistry.Clients[s.Address]
+		for mtdName, mtdConf := range s.Methods {
+			path := conf.GatewayRoute + s.ServiceRoute + mtdConf.MethodRoute
+			fmt.Println(path, mtdConf.Type)
+			router.HandleFunc("/"+path, middleware(mtdName, c.InvokeGrpcMethod)).Methods(mtdConf.Type)
+			fmt.Println(router.GetRoute("/" + path))
+		}
+	}
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", "8000"), router))
+
+}
+func middleware(mtdName string, h http.HandlerFunc) http.HandlerFunc {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "mtdName", mtdName)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 
 }
