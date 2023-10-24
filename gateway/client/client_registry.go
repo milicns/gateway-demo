@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"grpc-router/config"
+	"gateway/config"
 	"time"
 
 	"github.com/fullstorydev/grpcurl"

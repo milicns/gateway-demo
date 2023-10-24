@@ -3,8 +3,8 @@ package startup
 import (
 	"context"
 	"fmt"
-	"grpc-router/client"
-	"grpc-router/config"
+	"gateway/client"
+	"gateway/config"
 	"log"
 	"net/http"
 

@@ -9,6 +9,16 @@ services:
       CreateUser:
         method_route: /create
         type: POST
+      PathParamsTest:
+        method_route: /{id}/asd/{name}
+        type: GET
+      PathParamTest:
+        method_route: /asdf/{id} 
+        type: DELETE
+      PathParamsAndBodyTest:
+        method_route: /{name}/asd/{id}
+        type: PUT
+      
   OrderService:
     address: order_service:8080
     service_route: /order

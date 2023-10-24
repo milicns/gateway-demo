@@ -3,10 +3,13 @@ package client
 import (
 	"bytes"
 	"context"
-	"grpc-router/config"
+	"gateway/config"
+	"io"
 	"net/http"
 
 	"github.com/fullstorydev/grpcurl"
+	"github.com/goccy/go-json"
+	"github.com/gorilla/mux"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"google.golang.org/grpc"
 )
@@ -22,10 +25,12 @@ type Client struct {
 func (client *Client) InvokeGrpcMethod(writer http.ResponseWriter, req *http.Request) {
 	descSource := client.descSource
 	mtdName := req.Context().Value("mtdName").(string)
+	reader := prepareReader(req)
 
+	//fmt.Println(req.Header)
 	var resultBuffer bytes.Buffer
 
-	rf, formatter, _ := grpcurl.RequestParserAndFormatterFor(grpcurl.Format("json"), descSource, false, true, req.Body)
+	rf, formatter, _ := grpcurl.RequestParserAndFormatter(grpcurl.Format("json"), descSource, reader, grpcurl.FormatOptions{})
 	h := &grpcurl.DefaultEventHandler{
 		Out:            &resultBuffer,
 		Formatter:      formatter,
@@ -40,4 +45,23 @@ func (client *Client) InvokeGrpcMethod(writer http.ResponseWriter, req *http.Req
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusCreated)
 	writer.Write(resultBuffer.Bytes())
+}
+
+func prepareReader(req *http.Request) io.Reader {
+	var reader io.Reader
+	params := mux.Vars(req)
+	var reqBodyMap map[string]interface{}
+	json.NewDecoder(req.Body).Decode(&reqBodyMap)
+	if reqBodyMap != nil {
+		for k, v := range params {
+			reqBodyMap[k] = v
+		}
+		reqBodyBytes, _ := json.Marshal(reqBodyMap)
+		reader = bytes.NewReader(reqBodyBytes)
+	} else {
+		paramsBytes, _ := json.Marshal(params)
+		reader = bytes.NewReader(paramsBytes)
+	}
+
+	return reader
 }

@@ -6,6 +6,8 @@ import (
 	"user-service/model"
 	pb "user-service/proto"
 	"user-service/service"
+
+	"google.golang.org/grpc/metadata"
 )
 
 type UserHandler struct {
@@ -30,14 +32,22 @@ func (handler *UserHandler) CreateUser(ctx context.Context, request *pb.CreateUs
 	}, nil
 }
 
-func (handler *UserHandler) GetUser(ctx context.Context, request *pb.UserIdRequest) (*pb.GetUserResponse, error) {
-	return &pb.GetUserResponse{
-		Message: "Retrieved user" + request.Id,
+func (handler *UserHandler) PathParamsTest(ctx context.Context, request *pb.PathParamsRequest) (*pb.PathParamResponse, error) {
+	return &pb.PathParamResponse{
+		Message: "Param1: " + request.Id + " Param2: " + request.Name,
 	}, nil
 }
 
-func (handler *UserHandler) DeleteUser(ctx context.Context, request *pb.UserIdRequest) (*pb.DeleteUserResponse, error) {
-	return &pb.DeleteUserResponse{
-		Message: "Deleted user" + request.Id,
+func (handler *UserHandler) PathParamTest(ctx context.Context, request *pb.PathParamRequest) (*pb.PathParamResponse, error) {
+	return &pb.PathParamResponse{
+		Message: "Param1: " + request.Id,
+	}, nil
+}
+
+func (handler *UserHandler) PathParamsAndBodyTest(ctx context.Context, request *pb.PathParamsAndBodyRequest) (*pb.PathParamResponse, error) {
+	md, _ := metadata.FromIncomingContext(ctx)
+	fmt.Println(md)
+	return &pb.PathParamResponse{
+		Message: "Param1: " + request.Id + " Param2: " + request.Name + ". Body: " + request.Surname + "," + fmt.Sprint(request.Number),
 	}, nil
 }

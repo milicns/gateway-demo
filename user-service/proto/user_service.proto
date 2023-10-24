@@ -4,8 +4,9 @@ option go_package = "user-service/proto";
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {}
-    rpc GetUser(UserIdRequest) returns (GetUserResponse) {}
-    rpc DeleteUser(UserIdRequest) returns (DeleteUserResponse) {}
+    rpc PathParamsTest(PathParamsRequest) returns (PathParamResponse) {}
+    rpc PathParamTest(PathParamRequest) returns (PathParamResponse) {}
+    rpc PathParamsAndBodyTest(PathParamsAndBodyRequest) returns (PathParamResponse) {}
 }
 
 message CreateUserRequest {
@@ -17,14 +18,24 @@ message CreateUserResponse {
     string message = 1;
 }
 
-message UserIdRequest {
+message PathParamsRequest {
+    string id = 1;
+    string name = 2;
+}
+
+message PathParamsAndBodyRequest {
+    string id = 1;
+    string name = 2;
+    string surname = 3;
+    int32 number = 4;
+}
+
+message PathParamRequest {
     string id = 1;
 }
 
-message GetUserResponse {
+message PathParamResponse {
     string message = 1;
 }
 
-message DeleteUserResponse {
-    string message = 1;
-}
+

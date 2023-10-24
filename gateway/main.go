@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"grpc-router/config"
-	"grpc-router/startup"
+	"gateway/config"
+	"gateway/startup"
 )
 
 func main() {
