@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"gateway/config"
 	"io"
 	"net/http"
@@ -26,17 +27,21 @@ func (client *Client) InvokeGrpcMethod(writer http.ResponseWriter, req *http.Req
 	descSource := client.descSource
 	mtdName := req.Context().Value("mtdName").(string)
 	reader := prepareReader(req)
-
-	//fmt.Println(req.Header)
+	fmt.Println(req.Header)
 	var resultBuffer bytes.Buffer
-
+	headers := make([]string, 0, len(req.Header))
+	req.Header["Content-Type"] = []string{"application/grpc"}
+	for k, v := range req.Header {
+		headers = append(headers, fmt.Sprintf("%s: %s", k, v))
+	}
+	fmt.Println(headers)
 	rf, formatter, _ := grpcurl.RequestParserAndFormatter(grpcurl.Format("json"), descSource, reader, grpcurl.FormatOptions{})
 	h := &grpcurl.DefaultEventHandler{
 		Out:            &resultBuffer,
 		Formatter:      formatter,
 		VerbosityLevel: 0,
 	}
-	err := grpcurl.InvokeRPC(context.Background(), descSource, client.cc, client.grpcServiceName+"/"+mtdName, nil, h, rf.Next)
+	err := grpcurl.InvokeRPC(context.Background(), descSource, client.cc, client.grpcServiceName+"/"+mtdName, headers, h, rf.Next)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
@@ -64,4 +69,5 @@ func prepareReader(req *http.Request) io.Reader {
 	}
 
 	return reader
+
 }
