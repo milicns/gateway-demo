@@ -27,14 +27,10 @@ func (client *Client) InvokeGrpcMethod(writer http.ResponseWriter, req *http.Req
 	descSource := client.descSource
 	mtdName := req.Context().Value("mtdName").(string)
 	reader := prepareReader(req)
-	fmt.Println(req.Header)
 	var resultBuffer bytes.Buffer
-	headers := make([]string, 0, len(req.Header))
-	req.Header["Content-Type"] = []string{"application/grpc"}
-	for k, v := range req.Header {
-		headers = append(headers, fmt.Sprintf("%s: %s", k, v))
-	}
-	fmt.Println(headers)
+
+	headers := prepareHeaders(req.Header)
+
 	rf, formatter, _ := grpcurl.RequestParserAndFormatter(grpcurl.Format("json"), descSource, reader, grpcurl.FormatOptions{})
 	h := &grpcurl.DefaultEventHandler{
 		Out:            &resultBuffer,
@@ -69,5 +65,15 @@ func prepareReader(req *http.Request) io.Reader {
 	}
 
 	return reader
+}
 
+func prepareHeaders(headers http.Header) []string {
+	preparedHeaders := make([]string, 0, len(headers))
+	for k, v := range headers {
+		if k == "Connection" {
+			continue
+		}
+		preparedHeaders = append(preparedHeaders, fmt.Sprintf("%s: %s", k, v[0]))
+	}
+	return preparedHeaders
 }
