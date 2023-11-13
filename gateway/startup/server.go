@@ -31,21 +31,25 @@ func (s *Server) prepareClients() *client.ClientRegistry {
 	}
 
 	for _, s := range s.config.Services {
-		clientRegistry.NewClient(s.Address, s.Methods)
+		clientRegistry.NewClient(s.Address)
 	}
 
 	return clientRegistry
 }
 func (s *Server) prepareRoutes(clientRegistry *client.ClientRegistry) *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter().PathPrefix(s.config.Gateway.Route).Subrouter()
 
 	for _, srv := range s.config.Services {
 		client := clientRegistry.Clients[srv.Address]
-		for mtdName, mtdConf := range srv.Methods {
-			path := s.config.Gateway.Route + srv.ServiceRoute + mtdConf.MethodRoute
-			router.HandleFunc("/"+path, methodNameMiddleware(mtdName, client.InvokeGrpcMethod)).Methods(mtdConf.Type)
+		for version, methods := range srv.Methods {
+			versionRouter := router.PathPrefix("/" + version).Subrouter().StrictSlash(true)
+			for mtdName, mtdConf := range methods {
+				path := srv.ServiceRoute + mtdConf.MethodRoute
+				versionRouter.Path(path).HandlerFunc(methodNameMiddleware(mtdName, client.InvokeGrpcMethod)).Methods(mtdConf.Type)
+			}
 		}
 	}
+
 	return router
 }
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"gateway/config"
 	"io"
 	"net/http"
 
@@ -18,7 +17,6 @@ import (
 type Client struct {
 	refClient       *grpcreflect.Client
 	cc              *grpc.ClientConn
-	methods         map[string]config.MethodConfig
 	descSource      grpcurl.DescriptorSource
 	grpcServiceName string
 }

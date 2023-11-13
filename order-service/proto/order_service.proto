@@ -4,6 +4,11 @@ option go_package = "order-service/proto";
 
 service OrderService {
     rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {}
+    rpc CreateOrderV2(CreateOrderV2Request) returns (CreateOrderResponse) {}
+}
+
+message CreateOrderV2Request {
+    int32 id = 1;
 }
 
 message CreateOrderRequest {

@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"gateway/config"
 	"time"
 
 	"github.com/fullstorydev/grpcurl"
@@ -15,7 +14,7 @@ type ClientRegistry struct {
 	Clients map[string]Client
 }
 
-func (registry *ClientRegistry) NewClient(address string, methods map[string]config.MethodConfig) {
+func (registry *ClientRegistry) NewClient(address string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var cc *grpc.ClientConn
 	var err error
@@ -27,5 +26,5 @@ func (registry *ClientRegistry) NewClient(address string, methods map[string]con
 	refClient := grpcreflect.NewClientAuto(context.Background(), cc)
 	descSource := grpcurl.DescriptorSourceFromServer(context.Background(), refClient)
 	services, _ := descSource.ListServices()
-	registry.Clients[address] = Client{refClient: refClient, cc: cc, methods: methods, descSource: descSource, grpcServiceName: services[0]}
+	registry.Clients[address] = Client{refClient: refClient, cc: cc, descSource: descSource, grpcServiceName: services[0]}
 }

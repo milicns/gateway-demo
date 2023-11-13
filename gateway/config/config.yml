@@ -1,29 +1,35 @@
 gateway: 
-  route: "api/shop"
+  route: /api/shop
   port: 8000
 services:
   UserService:
     address: user_service:8080
     service_route: /user
-    grpc_methods:
-      CreateUser:
-        method_route: /create
-        type: POST
-      PathParamsTest:
-        method_route: /{id}/asd/{name}
-        type: GET
-      PathParamTest:
-        method_route: /asdf/{id} 
-        type: DELETE
-      PathParamsAndBodyTest:
-        method_route: /{name}/asd/{id}
-        type: PUT
+    methods:
+      v1:
+        CreateUser:
+          method_route: /create
+          type: POST
+        PathParamsTest:
+          method_route: /{id}/asd/{name}
+          type: GET
+        PathParamTest:
+          method_route: /asdf/{id} 
+          type: DELETE
+        PathParamsAndBodyTest:
+          method_route: /{name}/asd/{id}
+          type: PUT
       
   OrderService:
     address: order_service:8080
     service_route: /order
-    grpc_methods:
-      CreateOrder:
-        method_route: /create
-        type: POST
+    methods:
+      v1:
+        CreateOrder:
+          method_route: /create
+          type: POST
+      v2:
+        CreateOrderV2:
+          method_route: /create
+          type: POST
 

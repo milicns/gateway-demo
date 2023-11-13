@@ -17,9 +17,9 @@ type Gateway struct {
 }
 
 type ServiceConfig struct {
-	Address      string                  `yaml:"address"`
-	ServiceRoute string                  `yaml:"service_route"`
-	Methods      map[string]MethodConfig `yaml:"grpc_methods"`
+	Address      string                             `yaml:"address"`
+	ServiceRoute string                             `yaml:"service_route"`
+	Methods      map[string]map[string]MethodConfig `yaml:"methods"`
 }
 
 type MethodConfig struct {

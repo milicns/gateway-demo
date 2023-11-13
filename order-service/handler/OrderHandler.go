@@ -28,3 +28,9 @@ func (handler *OrderHandler) CreateOrder(ctx context.Context, request *pb.Create
 		Message: "Order created",
 	}, nil
 }
+
+func (handler *OrderHandler) CreateOrderV2(ctx context.Context, request *pb.CreateOrderV2Request) (*pb.CreateOrderResponse, error) {
+	return &pb.CreateOrderResponse{
+		Message: "Create order v2",
+	}, nil
+}
