@@ -6,6 +6,9 @@ import (
 	"order-service/model"
 	pb "order-service/proto"
 	"order-service/service"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type OrderHandler struct {
@@ -21,7 +24,7 @@ func (handler *OrderHandler) CreateOrder(ctx context.Context, request *pb.Create
 
 	err := handler.Service.Create(order)
 	if err != nil {
-		return &pb.CreateOrderResponse{}, err
+		return &pb.CreateOrderResponse{}, status.Error(codes.Internal, "Already exists")
 	}
 
 	return &pb.CreateOrderResponse{

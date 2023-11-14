@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jhump/protoreflect/grpcreflect"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
 type Client struct {
@@ -25,24 +26,30 @@ func (client *Client) InvokeGrpcMethod(writer http.ResponseWriter, req *http.Req
 	descSource := client.descSource
 	mtdName := req.Context().Value("mtdName").(string)
 	reader := prepareReader(req)
-	var resultBuffer bytes.Buffer
-
 	headers := prepareHeaders(req.Header)
 
+	var resultBuffer bytes.Buffer
 	rf, formatter, _ := grpcurl.RequestParserAndFormatter(grpcurl.Format("json"), descSource, reader, grpcurl.FormatOptions{})
 	h := &grpcurl.DefaultEventHandler{
 		Out:            &resultBuffer,
 		Formatter:      formatter,
 		VerbosityLevel: 0,
 	}
+
 	err := grpcurl.InvokeRPC(context.Background(), descSource, client.cc, client.grpcServiceName+"/"+mtdName, headers, h, rf.Next)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	httpCode := statusCodes[h.Status.Code()]
+	if h.Status.Message() != "" {
+		http.Error(writer, h.Status.Message(), httpCode)
+		return
+	}
+
 	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
+	writer.WriteHeader(httpCode)
 	writer.Write(resultBuffer.Bytes())
 }
 
@@ -74,4 +81,13 @@ func prepareHeaders(headers http.Header) []string {
 		preparedHeaders = append(preparedHeaders, fmt.Sprintf("%s: %s", k, v[0]))
 	}
 	return preparedHeaders
+}
+
+var statusCodes = map[codes.Code]int{
+	codes.Internal:         http.StatusBadRequest,
+	codes.Unauthenticated:  http.StatusUnauthorized,
+	codes.PermissionDenied: http.StatusForbidden,
+	codes.Unimplemented:    http.StatusNotFound,
+	codes.Unavailable:      http.StatusServiceUnavailable,
+	codes.OK:               http.StatusOK,
 }

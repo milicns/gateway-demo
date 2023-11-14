@@ -7,7 +7,9 @@ import (
 	pb "user-service/proto"
 	"user-service/service"
 
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type UserHandler struct {
@@ -24,7 +26,7 @@ func (handler *UserHandler) CreateUser(ctx context.Context, request *pb.CreateUs
 
 	err := handler.Service.Create(user)
 	if err != nil {
-		return &pb.CreateUserResponse{}, err
+		return &pb.CreateUserResponse{}, status.Error(codes.Internal, "Already exists")
 	}
 
 	return &pb.CreateUserResponse{
