@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Services map[string]ServiceConfig `yaml:"services"`
-	Gateway  Gateway                  `yaml:"gateway"`
+	Services map[string]string                             `yaml:"services"`
+	Gateway  Gateway                                       `yaml:"gateway"`
+	Groups   map[string]map[string]map[string]MethodConfig `yaml:"groups"`
 }
 
 type Gateway struct {
@@ -16,15 +17,10 @@ type Gateway struct {
 	Port  string `yaml:"port"`
 }
 
-type ServiceConfig struct {
-	Address      string                             `yaml:"address"`
-	ServiceRoute string                             `yaml:"service_route"`
-	Methods      map[string]map[string]MethodConfig `yaml:"methods"`
-}
-
 type MethodConfig struct {
 	MethodRoute string `yaml:"method_route"`
 	Type        string `yaml:"type"`
+	Service     string `yaml:"service"`
 }
 
 func LoadConfig() (*Config, error) {

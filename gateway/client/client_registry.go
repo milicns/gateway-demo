@@ -14,7 +14,7 @@ type ClientRegistry struct {
 	Clients map[string]Client
 }
 
-func (registry *ClientRegistry) NewClient(address string) {
+func (registry *ClientRegistry) NewClient(name, address string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var cc *grpc.ClientConn
 	var err error
@@ -26,5 +26,5 @@ func (registry *ClientRegistry) NewClient(address string) {
 	refClient := grpcreflect.NewClientAuto(context.Background(), cc)
 	descSource := grpcurl.DescriptorSourceFromServer(context.Background(), refClient)
 	services, _ := descSource.ListServices()
-	registry.Clients[address] = Client{refClient: refClient, cc: cc, descSource: descSource, grpcServiceName: services[0]}
+	registry.Clients[name] = Client{refClient: refClient, cc: cc, descSource: descSource, grpcServiceName: services[0]}
 }

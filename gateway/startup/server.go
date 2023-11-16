@@ -30,8 +30,8 @@ func (s *Server) prepareClients() *client.ClientRegistry {
 		Clients: make(map[string]client.Client),
 	}
 
-	for _, s := range s.config.Services {
-		clientRegistry.NewClient(s.Address)
+	for k, v := range s.config.Services {
+		clientRegistry.NewClient(k, v)
 	}
 
 	return clientRegistry
@@ -39,13 +39,13 @@ func (s *Server) prepareClients() *client.ClientRegistry {
 func (s *Server) prepareRoutes(clientRegistry *client.ClientRegistry) *mux.Router {
 	router := mux.NewRouter().PathPrefix(s.config.Gateway.Route).Subrouter()
 
-	for _, srv := range s.config.Services {
-		client := clientRegistry.Clients[srv.Address]
-		for version, methods := range srv.Methods {
-			versionRouter := router.PathPrefix("/" + version).Subrouter().StrictSlash(true)
+	for group, versions := range s.config.Groups {
+		groupRouter := router.PathPrefix("/" + group).Subrouter()
+		for version, methods := range versions {
+			versionRouter := groupRouter.PathPrefix("/" + version).Subrouter()
 			for mtdName, mtdConf := range methods {
-				path := srv.ServiceRoute + mtdConf.MethodRoute
-				versionRouter.Path(path).HandlerFunc(methodNameMiddleware(mtdName, client.InvokeGrpcMethod)).Methods(mtdConf.Type)
+				client := clientRegistry.Clients[mtdConf.Service]
+				versionRouter.Path(mtdConf.MethodRoute).HandlerFunc(methodNameMiddleware(mtdName, client.InvokeGrpcMethod)).Methods(mtdConf.Type)
 			}
 		}
 	}
